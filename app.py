@@ -2,69 +2,80 @@ import requests
 from bs4 import BeautifulSoup
 import streamlit as st
 
-# ---------------- CONFIG ----------------
+# ================== PAGE CONFIG ==================
 st.set_page_config(
     page_title="Newsletter Content Collector",
     page_icon="📰",
     layout="centered"
 )
 
-# ---------------- SESSION STATE ----------------
+# ================== SESSION STATE ==================
 if "data" not in st.session_state:
     st.session_state.data = None
 
-# ---------------- STYLE (DARK NPR THEME) ----------------
-st.markdown("""
+# ================== THEME (LIGHT / NPR STYLE) ==================
+BG_COLOR = "#f5f5f5"
+CARD_COLOR = "#ffffff"
+INPUT_COLOR = "#f7f7f7"
+TEXT_COLOR = "#111111"
+SUBTEXT_COLOR = "#666666"
+ACCENT_RED = "#d62021"
+BUTTON_BLUE = "#3f7bd9"
+
+st.markdown(f"""
 <style>
-html, body, .main {
-    background-color: #0b0f14;
-    color: #f5f5f5;
-}
-.block-container {
-    max-width: 900px;
-}
-h1 {
-    color: #e11c2a;
+html, body, .main {{
+    background-color: {BG_COLOR};
+    color: {TEXT_COLOR};
+}}
+.block-container {{
+    max-width: 850px;
+}}
+h1 {{
+    color: {ACCENT_RED};
     font-weight: 700;
-}
-.card {
-    background-color: #161b22;
+    text-align: center;
+}}
+.card {{
+    background-color: {CARD_COLOR};
     border-radius: 12px;
-    padding: 22px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-}
-label {
-    font-weight: 600;
-}
-textarea {
-    background-color: #1f2430 !important;
-    color: #f5f5f5 !important;
-    border-radius: 8px !important;
-}
-button[kind="primary"] {
-    background-color: #e11c2a !important;
+    padding: 26px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}}
+textarea {{
+    background-color: {INPUT_COLOR} !important;
+    color: {TEXT_COLOR} !important;
+    border-radius: 6px !important;
+}}
+button[kind="primary"] {{
+    background-color: {BUTTON_BLUE} !important;
     border-radius: 8px !important;
     font-weight: 700;
-}
-.copy-btn button {
-    background-color: #e11c2a !important;
+}}
+.copy-btn button {{
+    background-color: {ACCENT_RED} !important;
     height: 46px;
     width: 100%;
     font-weight: 700;
-}
-.footer {
+}}
+.footer {{
     text-align: center;
-    margin-top: 30px;
-    color: #c9c9c9;
-}
+    margin-top: 24px;
+    color: {SUBTEXT_COLOR};
+}}
+.subtext {{
+    text-align: center;
+    color: {SUBTEXT_COLOR};
+}}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
+# ================== HEADER ==================
 st.title("Newsletter Content Collector")
-st.write("Paste the link to the story below.")
+st.markdown("<div class='subtext'>Paste the link to the story below.</div>", unsafe_allow_html=True)
+st.write("")
 
-# ---------------- HELPERS ----------------
+# ================== HELPERS ==================
 def meta(soup, prop=None, name=None):
     if prop:
         tag = soup.find("meta", property=prop)
@@ -101,26 +112,26 @@ def extract_npr(url):
     }
 
 def render_row(label, value, key):
-    c1, c2 = st.columns([6, 1])
-    with c1:
+    col1, col2 = st.columns([6, 1])
+    with col1:
         st.text_area(label, value, key=f"text_{key}", height=80)
-    with c2:
-        st.markdown('<div class="copy-btn">', unsafe_allow_html=True)
+    with col2:
+        st.markdown("<div class='copy-btn'>", unsafe_allow_html=True)
         if st.button("Copy", key=f"copy_{key}"):
             st.session_state["_clipboard"] = value
             st.toast(f"{label} copied")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# ---------------- FORM (ENTER WORKS) ----------------
+# ================== FORM (ENTER WORKS) ==================
 with st.form("collect_form"):
     url = st.text_input(
         "",
         placeholder="https://www.npr.org/...",
         label_visibility="collapsed"
     )
-    submitted = st.form_submit_button("Collect content")
+    submitted = st.form_submit_button("Collect Content!")
 
-# ---------------- ACTION ----------------
+# ================== ACTION ==================
 if submitted:
     if not url or "npr.org" not in url:
         st.error("Please paste a valid NPR story link.")
@@ -130,20 +141,21 @@ if submitted:
         except Exception as e:
             st.error(f"Failed to fetch story: {e}")
 
-# ---------------- OUTPUT (PERSISTENT) ----------------
+# ================== OUTPUT ==================
 if st.session_state.data:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("Collected content")
 
     for i, (label, value) in enumerate(st.session_state.data.items()):
         render_row(label, value, i)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# ---------------- FOOTER ----------------
+# ================== FOOTER ==================
 st.markdown("""
 <div class="footer">
 Questions? +1 (707) 412-8684<br><br>
-❤️ Michal Ruprecht
+<strong>Dig up the gold for your newsletter</strong><br>
+❤️ Michal Ruprecht from the Science Desk
 </div>
 """, unsafe_allow_html=True)
