@@ -2,44 +2,38 @@ import requests
 from bs4 import BeautifulSoup
 import streamlit as st
 
-# ---------- PAGE CONFIG ----------
+# ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="Newsletter Content Collector",
     page_icon="📰",
     layout="centered"
 )
 
-# ---------- NPR THEME (simple + clean) ----------
+# ---------------- STYLE (NPR THEME) ----------------
 st.markdown("""
 <style>
-    body {
-        background-color: #ffffff;
-    }
-    .main {
-        background-color: #ffffff;
-    }
-    h1, h2, h3 {
-        color: #d62021; /* NPR red */
-    }
+    body, .main { background-color: #ffffff; }
+    h1 { color: #d62021; }
     .stButton button {
         background-color: #d62021;
         color: white;
-        border-radius: 6px;
         font-weight: 600;
+        border-radius: 6px;
     }
-    .copy-box textarea {
+    .copy-btn button {
+        background-color: #374151;
+    }
+    textarea {
         font-size: 14px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- HEADER ----------
+# ---------------- HEADER ----------------
 st.title("Newsletter Content Collector")
 st.write("Paste the link to the story below.")
 
-url = st.text_input("", placeholder="https://www.npr.org/...")
-
-# ---------- HELPERS ----------
+# ---------------- HELPERS ----------------
 def meta(soup, prop=None, name=None):
     if prop:
         tag = soup.find("meta", property=prop)
@@ -69,8 +63,26 @@ def extract_npr(url):
 
     return headline, link, photo, teaser, teaser_author
 
-# ---------- ACTION ----------
-if st.button("Collect content"):
+def copy_row(label, value, key):
+    col1, col2 = st.columns([5, 1])
+    with col1:
+        st.text_area(label, value, key=key, height=70)
+    with col2:
+        if st.button("Copy", key=f"copy_{key}"):
+            st.session_state["_clipboard"] = value
+            st.toast(f"{label} copied")
+
+# ---------------- FORM (ENTER KEY WORKS HERE) ----------------
+with st.form("collect_form"):
+    url = st.text_input(
+        "",
+        placeholder="https://www.npr.org/...",
+        label_visibility="collapsed"
+    )
+    submitted = st.form_submit_button("Collect content")
+
+# ---------------- ACTION ----------------
+if submitted:
     if not url or "npr.org" not in url:
         st.error("Please paste a valid NPR story link.")
     else:
@@ -79,28 +91,21 @@ if st.button("Collect content"):
 
             st.subheader("Collected content")
 
-            st.markdown("**Headline**")
-            st.text_area("", headline, key="headline")
-
-            st.markdown("**Link**")
-            st.text_area("", link, key="link")
-
-            st.markdown("**Photo URL**")
-            st.text_area("", photo, key="photo")
-
-            st.markdown("**Teaser**")
-            st.text_area("", teaser, key="teaser")
-
-            st.markdown("**Teaser + author**")
-            st.text_area("", teaser_author, key="teaser_author")
+            copy_row("Headline", headline, "headline")
+            copy_row("Link", link, "link")
+            copy_row("Photo URL", photo, "photo")
+            copy_row("Teaser", teaser, "teaser")
+            copy_row("Teaser with author", teaser_author, "teaser_author")
 
         except Exception as e:
             st.error(f"Failed to fetch story: {e}")
 
-# ---------- FOOTER ----------
+# ---------------- FOOTER ----------------
 st.markdown("---")
 st.markdown("""
 Questions?  
 +1 (707) 412-8684  
-❤️ Michal Ruprecht
+
+Dig up the gold for your newsletter
+❤️ Michal Ruprecht from the Science Desk
 """)
