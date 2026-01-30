@@ -2,30 +2,61 @@ import requests
 from bs4 import BeautifulSoup
 import streamlit as st
 
-# ---------------- PAGE CONFIG ----------------
+# ---------------- CONFIG ----------------
 st.set_page_config(
     page_title="Newsletter Content Collector",
     page_icon="📰",
     layout="centered"
 )
 
-# ---------------- STYLE (NPR THEME) ----------------
+# ---------------- SESSION STATE ----------------
+if "data" not in st.session_state:
+    st.session_state.data = None
+
+# ---------------- STYLE (DARK NPR THEME) ----------------
 st.markdown("""
 <style>
-    body, .main { background-color: #ffffff; }
-    h1 { color: #d62021; }
-    .stButton button {
-        background-color: #d62021;
-        color: white;
-        font-weight: 600;
-        border-radius: 6px;
-    }
-    .copy-btn button {
-        background-color: #374151;
-    }
-    textarea {
-        font-size: 14px;
-    }
+html, body, .main {
+    background-color: #0b0f14;
+    color: #f5f5f5;
+}
+.block-container {
+    max-width: 900px;
+}
+h1 {
+    color: #e11c2a;
+    font-weight: 700;
+}
+.card {
+    background-color: #161b22;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+label {
+    font-weight: 600;
+}
+textarea {
+    background-color: #1f2430 !important;
+    color: #f5f5f5 !important;
+    border-radius: 8px !important;
+}
+button[kind="primary"] {
+    background-color: #e11c2a !important;
+    border-radius: 8px !important;
+    font-weight: 700;
+}
+.copy-btn button {
+    background-color: #e11c2a !important;
+    height: 46px;
+    width: 100%;
+    font-weight: 700;
+}
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #c9c9c9;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -61,18 +92,26 @@ def extract_npr(url):
     else:
         teaser_author = teaser
 
-    return headline, link, photo, teaser, teaser_author
+    return {
+        "Headline": headline,
+        "Link": link,
+        "Photo URL": photo,
+        "Teaser": teaser,
+        "Teaser with author": teaser_author
+    }
 
-def copy_row(label, value, key):
-    col1, col2 = st.columns([5, 1])
-    with col1:
-        st.text_area(label, value, key=key, height=70)
-    with col2:
+def render_row(label, value, key):
+    c1, c2 = st.columns([6, 1])
+    with c1:
+        st.text_area(label, value, key=f"text_{key}", height=80)
+    with c2:
+        st.markdown('<div class="copy-btn">', unsafe_allow_html=True)
         if st.button("Copy", key=f"copy_{key}"):
             st.session_state["_clipboard"] = value
             st.toast(f"{label} copied")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- FORM (ENTER KEY WORKS HERE) ----------------
+# ---------------- FORM (ENTER WORKS) ----------------
 with st.form("collect_form"):
     url = st.text_input(
         "",
@@ -87,25 +126,24 @@ if submitted:
         st.error("Please paste a valid NPR story link.")
     else:
         try:
-            headline, link, photo, teaser, teaser_author = extract_npr(url)
-
-            st.subheader("Collected content")
-
-            copy_row("Headline", headline, "headline")
-            copy_row("Link", link, "link")
-            copy_row("Photo URL", photo, "photo")
-            copy_row("Teaser", teaser, "teaser")
-            copy_row("Teaser with author", teaser_author, "teaser_author")
-
+            st.session_state.data = extract_npr(url)
         except Exception as e:
             st.error(f"Failed to fetch story: {e}")
 
-# ---------------- FOOTER ----------------
-st.markdown("---")
-st.markdown("""
-Questions?  
-+1 (707) 412-8684  
+# ---------------- OUTPUT (PERSISTENT) ----------------
+if st.session_state.data:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("Collected content")
 
-Dig up the gold for your newsletter
-❤️ Michal Ruprecht from the Science Desk
-""")
+    for i, (label, value) in enumerate(st.session_state.data.items()):
+        render_row(label, value, i)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------- FOOTER ----------------
+st.markdown("""
+<div class="footer">
+Questions? +1 (707) 412-8684<br><br>
+❤️ Michal Ruprecht
+</div>
+""", unsafe_allow_html=True)
