@@ -1,8 +1,8 @@
-import html
 import json
 import requests
 from bs4 import BeautifulSoup
 import streamlit as st
+import streamlit.components.v1 as components
 
 # ================== PAGE CONFIG ==================
 st.set_page_config(
@@ -16,124 +16,110 @@ if "data" not in st.session_state:
     st.session_state.data = None
 
 # ================== THEME ==================
-BG_COLOR = "#f5f5f5"
-CARD_COLOR = "#ffffff"
-INPUT_COLOR = "#f7f7f7"
-TEXT_COLOR = "#111111"
-SUBTEXT_COLOR = "#666666"
-ACCENT_RED = "#d62021"
-BUTTON_BLUE = "#3f7bd9"
-BORDER_COLOR = "#d9d9d9"
+BG_COLOR = "#060913"
+CARD_COLOR = "#0b1020"
+INPUT_BG = "#f2f2f2"
+TEXT_COLOR = "#f5f5f5"
+DARK_TEXT = "#111111"
+SUBTEXT_COLOR = "#b7bcc8"
+BORDER_COLOR = "#394150"
+BUTTON_BG = "#111827"
+BUTTON_TEXT = "#f9fafb"
 
-st.markdown(f"""
-<style>
-html, body, .main {{
-    background-color: {BG_COLOR};
-    color: {TEXT_COLOR};
-}}
-
-.block-container {{
-    max-width: 850px;
-}}
-
-h1 {{
-    color: {ACCENT_RED};
-    font-weight: 700;
-    text-align: center;
-}}
-
-.card {{
-    background-color: {CARD_COLOR};
-    border-radius: 12px;
-    padding: 26px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}}
-
-button[kind="primary"] {{
-    background-color: {BUTTON_BLUE} !important;
-    border-radius: 8px !important;
-    font-weight: 700;
-}}
-
-.subtext {{
-    text-align: center;
-    color: {SUBTEXT_COLOR};
-}}
-
-.footer {{
-    text-align: center;
-    margin-top: 24px;
-    color: {SUBTEXT_COLOR};
-}}
-
-.copy-row {{
-    margin-bottom: 20px;
-}}
-
-.copy-label {{
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: {TEXT_COLOR};
-}}
-
-.copy-flex {{
-    display: grid;
-    grid-template-columns: 1fr 92px;
-    gap: 12px;
-    align-items: start;
-}}
-
-.copy-field {{
-    width: 100%;
-    min-height: 86px;
-    resize: vertical;
-    padding: 14px 16px;
-    border: 1px solid {BORDER_COLOR};
-    border-radius: 10px;
-    background: {INPUT_COLOR};
-    color: {TEXT_COLOR};
-    font-size: 16px;
-    line-height: 1.45;
-    font-family: sans-serif;
-    box-sizing: border-box;
-}}
-
-.copy-button {{
-    height: 54px;
-    border: 1px solid {BORDER_COLOR};
-    border-radius: 10px;
-    background: white;
-    color: {TEXT_COLOR};
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.15s ease;
-}}
-
-.copy-button:hover {{
-    border-color: {ACCENT_RED};
-    color: {ACCENT_RED};
-}}
-
-.copy-status {{
-    font-size: 0.85rem;
-    color: {SUBTEXT_COLOR};
-    margin-top: 6px;
-    min-height: 18px;
-}}
-
-@media (max-width: 640px) {{
-    .copy-flex {{
-        grid-template-columns: 1fr;
+st.markdown(
+    f"""
+    <style>
+    html, body, [data-testid="stAppViewContainer"], .stApp {{
+        background-color: {BG_COLOR};
+        color: {TEXT_COLOR};
     }}
 
-    .copy-button {{
-        width: 100%;
+    .block-container {{
+        max-width: 980px;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
     }}
-}}
-</style>
-""", unsafe_allow_html=True)
+
+    h1 {{
+        color: {TEXT_COLOR};
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+    }}
+
+    .subtext {{
+        color: {SUBTEXT_COLOR};
+        margin-bottom: 1.2rem;
+    }}
+
+    .card {{
+        background: transparent;
+        border-radius: 18px;
+        padding: 0;
+        box-shadow: none;
+    }}
+
+    div[data-testid="stTextInput"] input {{
+        background-color: {INPUT_BG} !important;
+        color: {DARK_TEXT} !important;
+        border-radius: 16px !important;
+        border: none !important;
+        min-height: 58px !important;
+        font-size: 18px !important;
+    }}
+
+    div[data-testid="stTextArea"] textarea {{
+        background-color: {INPUT_BG} !important;
+        color: {DARK_TEXT} !important;
+        border-radius: 16px !important;
+        border: none !important;
+        font-size: 18px !important;
+        line-height: 1.45 !important;
+        padding: 18px 20px !important;
+    }}
+
+    div[data-testid="stForm"] {{
+        border: 1px solid {BORDER_COLOR};
+        border-radius: 18px;
+        padding: 18px;
+        background: transparent;
+    }}
+
+    div[data-testid="stFormSubmitButton"] button {{
+        background-color: {BUTTON_BG} !important;
+        color: {BUTTON_TEXT} !important;
+        border: 1px solid {BORDER_COLOR} !important;
+        border-radius: 14px !important;
+        font-weight: 700 !important;
+        padding: 0.7rem 1.2rem !important;
+    }}
+
+    .section-title {{
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: {TEXT_COLOR};
+    }}
+
+    .field-label {{
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: {TEXT_COLOR};
+        margin-top: 0.25rem;
+        margin-bottom: 0.3rem;
+    }}
+
+    .footer {{
+        text-align: center;
+        margin-top: 32px;
+        color: {SUBTEXT_COLOR};
+        font-size: 0.95rem;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ================== HEADER ==================
 st.title("Newsletter Content Collector")
@@ -141,8 +127,6 @@ st.markdown(
     "<div class='subtext'>Paste the link to the story below.</div>",
     unsafe_allow_html=True
 )
-st.write("")
-
 
 # ================== HELPERS ==================
 def meta(soup, prop=None, name=None):
@@ -186,74 +170,68 @@ def extract_npr(url):
         "Link": link,
         "Photo URL": photo,
         "Teaser": teaser,
-        "Teaser with author": teaser_author
+        "Teaser with author": teaser_author,
     }
 
 
-def render_copy_row(label, value, idx):
-    escaped_label = html.escape(label)
-    escaped_value = html.escape(value or "")
-    js_value = json.dumps(value or "")
+def copy_button_component(value: str, key: str):
+    safe_value = json.dumps(value or "")
+    html_code = f"""
+    <html>
+      <body style="margin:0;padding:0;background:transparent;">
+        <button id="copy-btn-{key}"
+          style="
+            width:100%;
+            height:54px;
+            border-radius:14px;
+            border:1px solid {BORDER_COLOR};
+            background:{BUTTON_BG};
+            color:{BUTTON_TEXT};
+            font-weight:700;
+            font-size:16px;
+            cursor:pointer;
+          ">
+          Copy
+        </button>
 
-    st.markdown(
-        f"""
-        <div class="copy-row">
-            <div class="copy-label">{escaped_label}</div>
-            <div class="copy-flex">
-                <textarea
-                    id="copy-field-{idx}"
-                    class="copy-field"
-                >{escaped_value}</textarea>
+        <script>
+          const btn = document.getElementById("copy-btn-{key}");
+          const textToCopy = {safe_value};
 
-                <div>
-                    <button
-                        class="copy-button"
-                        type="button"
-                        onclick='copyFieldValue("copy-field-{idx}", "copy-status-{idx}")'
-                    >
-                        Copy
-                    </button>
-                    <div id="copy-status-{idx}" class="copy-status"></div>
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-st.markdown(
+          btn.onclick = async function() {{
+            try {{
+              await navigator.clipboard.writeText(textToCopy);
+              btn.innerText = "Copied";
+              setTimeout(() => btn.innerText = "Copy", 1000);
+            }} catch (err) {{
+              btn.innerText = "Failed";
+              setTimeout(() => btn.innerText = "Copy", 1200);
+            }}
+          }};
+        </script>
+      </body>
+    </html>
     """
-    <script>
-    async function copyFieldValue(fieldId, statusId) {
-        const field = document.getElementById(fieldId);
-        const status = document.getElementById(statusId);
+    components.html(html_code, height=54)
 
-        if (!field) return;
 
-        try {
-            await navigator.clipboard.writeText(field.value);
-            if (status) status.textContent = "Copied";
-        } catch (err) {
-            field.select();
-            field.setSelectionRange(0, 999999);
+def render_row(label, value, key):
+    st.markdown(f"<div class='field-label'>{label}</div>", unsafe_allow_html=True)
+    col1, col2 = st.columns([8.5, 1.5], vertical_alignment="top")
 
-            try {
-                document.execCommand("copy");
-                if (status) status.textContent = "Copied";
-            } catch (fallbackErr) {
-                if (status) status.textContent = "Copy failed";
-            }
-        }
+    with col1:
+        line_count = max(2, min(8, (len(value or "") // 75) + 1))
+        st.text_area(
+            label=f"{label}_{key}",
+            value=value,
+            height=max(90, line_count * 30 + 26),
+            label_visibility="collapsed",
+            key=f"text_{key}",
+        )
 
-        setTimeout(() => {
-            if (status) status.textContent = "";
-        }, 1200);
-    }
-    </script>
-    """,
-    unsafe_allow_html=True
-)
+    with col2:
+        copy_button_component(value, key)
+
 
 # ================== FORM ==================
 with st.form("collect_form"):
@@ -276,19 +254,22 @@ if submitted:
 
 # ================== OUTPUT ==================
 if st.session_state.data:
+    st.markdown("<div class='section-title'>Collected content</div>", unsafe_allow_html=True)
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("Collected content")
 
     for i, (label, value) in enumerate(st.session_state.data.items()):
-        render_copy_row(label, value, i)
+        render_row(label, value, i)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ================== FOOTER ==================
-st.markdown("""
-<div class="footer">
-Questions? +1 (707) 412-8684<br><br>
-<strong>Dig up the gold for your newsletter</strong><br>
-❤️ Michal Ruprecht from the Science Desk
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="footer">
+    Questions? +1 (707) 412-8684<br><br>
+    <strong>Dig up the gold for your newsletter</strong><br>
+    ❤️ Michal Ruprecht from the Science Desk
+    </div>
+    """,
+    unsafe_allow_html=True
+)
